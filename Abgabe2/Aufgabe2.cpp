@@ -5,8 +5,7 @@ using namespace std;
 float harmonic(int e, long long int n);
 float harmonicAlt(int e, long long int n);
 long double harmonicAltLong(int e, long long int n);
-void compare(int e, long long int n);
-int a2Main(int argc, char** argv);
+float mascheroni(int i);
 
 float harmonic(int e, long long int n){
 	float summe = 1;
