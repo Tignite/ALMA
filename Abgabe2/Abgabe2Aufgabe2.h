@@ -6,5 +6,6 @@ float harmonicAlt(int e, long long int n);
 long double harmonicAltLong(int e, long long int n);
 void compare(int e, long long int n);
 int a2Main(int argc, char** argv);
+float mascheroni(int i);
 
 #endif /* ABGABE2AUFGABE2_H_ */
