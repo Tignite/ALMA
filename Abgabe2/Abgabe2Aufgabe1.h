@@ -1,8 +1,0 @@
-#ifndef ABGABE2AUFGABE1_H_
-#define ABGABE2AUFGABE1_H_
-
-
-
-
-
-#endif /* ABGABE2AUFGABE1_H_ */
