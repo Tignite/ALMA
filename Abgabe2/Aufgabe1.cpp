@@ -12,8 +12,16 @@ double rueckwaertsRekursion(double startWert, double i){
 }
 
 void schleife(double i, double k, double startWertVorwaerts, double startWertRueckwaerts, double startWertRueckwaersSchlecht){
+	double vorne = vorwaertsRekursion(startWertVorwaerts, 0);
+	double rueck = rueckwaertsRekursion(startWertRueckwaerts, 20-0);
+	double schlecht = rueckwaertsRekursion(startWertRueckwaersSchlecht, 20-0);
 	for(int j = 0; j <= 20; j++){
-		cout<<vorwaertsRekursion(startWertVorwaerts, j)<<"\t"<<rueckwaertsRekursion(startWertRueckwaerts, 20-j)<<"\t"<<rueckwaertsRekursion(startWertRueckwaersSchlecht, 20-j)<<endl;
+		if(j != 0){
+			vorne = vorwaertsRekursion(vorne, 0);
+			rueck = rueckwaertsRekursion(rueck, 20-0);
+			schlecht = rueckwaertsRekursion(schlecht, 20-0);
+		}
+		cout<<vorne<<"\t"<<rueck<<"\t"<<schlecht<<endl;
 	}
 }
 
