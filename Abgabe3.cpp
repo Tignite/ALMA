@@ -1,10 +1,9 @@
-//#include <stdio.h>
 #include <math.h>		/* pow, sqrt */
 #include <iostream>		/* cin, cout */
 #include <new>			/* new */
 #include <string>		/* string */
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
+#include <stdlib.h>     	/* srand, rand */
+#include <time.h>       	/* time */
 
 using namespace std;
 
@@ -121,7 +120,6 @@ void eingabeDouble(double* a){
 }
 
 void initRand(double* x, int n){
-	srand (time(NULL) * rand());
 	for(int i = 0; i < n; i++){
 		x[i] = (((double) rand()) / ((double) RAND_MAX));
 	}
@@ -145,7 +143,7 @@ void printArray(double* x, int n){
 	if (x != NULL){
 	cout<<"(\n";
 	for(int i = 0; i < n; i++){
-		if(i+1 == n) cout<<x[i];
+		if(i+1 == n) cout<<", "<<x[i];
 		else if ((i % 5) == 0) cout<<x[i];
 		else if ( ((i+1) % 5) == 0 ){
 			cout<<", "<<x[i]<<"\n";
@@ -204,12 +202,20 @@ void routine(double* res, double* x, double* y, int n, double a){
 	delete results;
 }
 
-unsigned long long int bin(unsigned int n, unsigned int k){
-	unsigned long long res = 1;
-	if(k == 0) return 1;
+/*
+Lesen Sie außerdem eine Zahl “Anzahl der Versuche” ein und starten Sie folgendes
+(Zufalls-)Experiment. Bestimmen Sie die relative H¨aufigkeit, dass m unabh¨angig gezo-
+gene Zufallsvektoren aus [0, 1]n
+eine Lange (Norm) kleiner oder gleich 1 haben? Was
+beobachten Sie mit wachsender Dimension n?
+*/
+
+long long int bin(unsigned int n, unsigned int k){
+	long long int res = 1;
+	if(k == 0 || k == n) return 1;
 	else if( n >= k){
-		for(unsigned long long int i = 1; i <= k; i++){
-			res *= (n + 1 - i) / i;
+		for(long long int  i = 1; i <= k; i++){
+			res *= ((n) + 1 - i) / i;
 		}
 	}
 	else return 0;
@@ -223,25 +229,16 @@ void newArray(double** x, unsigned int v, unsigned int n){
 		x[i] = ptr;
 	}
 }
-void experiment(double** vektorArray){
-	unsigned int n = 10, v = 20;
+void experiment(double** vektorArray, unsigned int dim){
+	unsigned int v = 200, n = dim;
 	//eingabeInt(&n);
 	cout<<"Dimension n = "<<n<<"\nAnzahl Versuche v = "<<v<<endl;
 	//Erstellen der Vektoren
-	cout<<"Erstellen - starte\n";
 
-	vektorArray = new double*[n];
+	vektorArray = new double*[v];
 	newArray(vektorArray, v, n);
 
-	cout<<"Erstellen - fertig\n";
-
-	for(unsigned int i = 0; i < v; i++){
-		if(i%10 == 0) printArray(vektorArray[i], n);
-	}
-
-	/*
 	//Berechnen der Norm
-	cout<<"Berechnen der Norm- starte\n";
 
 	double res[] = {0.0};
 	int counter = 0;
@@ -250,44 +247,45 @@ void experiment(double** vektorArray){
 		//Anzahl Vorkommen
 		if( res[0] <= 1.0 ) counter++;
 	}
-	cout<<"Berechnen der Norm - fertig\n";
 
 
 
+	/*
 	//Auswertung
 	 * Für m unabhängige Zufallsvektoren aus [0, 1]^n gilt:
 	 * P = (n über m) * p^m * (1 - p)^(n-m)
 	 * mit p = Vorkommen / Gesamtanzahl
 	 * Anzahl Vorkommen = counter
 	 * Gesamtanzahl = v
-	 *//*
-	cout<<"Auswertung- starte\n";
+	 */
 	double p = ((double) counter) / ((double) v);
+	/*
+	 * Binomialverteilung
+	 * wegen Binomialkoeffizient ziemlich schnell ein Overflow
 	double* array = NULL;
 	createArray(array, v);
 	for(unsigned int i = 1; i <= v; i++ ){
-		unsigned long long int binom = bin(v,i);
-		unsigned long long int pPowM = pow(p, i);
-		unsigned long long int onePowNM = pow((1-p), (n-i));
-		array[i] = binom * pPowM * onePowNM;
+		long long int binom = bin(v,i);
+		long double pPowM = pow(p, (long double) i);
+		long double onePowNM = pow((1-p), (v-i));
+		array[i-1] = binom * pPowM * onePowNM;
 	}
 	long double sum = 0.0;
 	for(unsigned int i = 0; i < v; i++){
 		sum += array[i];
 	}
 	sum = sum/(double)v;
-	cout<<"Relative Haufigkeit = "<<p<<endl<<"Binomialverteilung = "<<sum<<endl;
+	*/
+	cout<<"Relative Haufigkeit = "<<p<<endl;
 	//Loeschen
 	for(unsigned int i = 0; i < v; i++){
-		delete[] vektorArray[i];
+		double* ptr = vektorArray[i];
+		delete[] ptr;
 	}
-	delete vektorArray;
-	delete[] array;
-	*/
 }
 int main(int argc, char** argv){
+	srand (time(NULL));
 	double** vektorArray = NULL;
-	/*
 	int n = 2000;
 	double a = 1.0;
 	double* x = NULL;
@@ -299,15 +297,9 @@ int main(int argc, char** argv){
 	cout<<"Skalar a = "<<a<<endl;
 	
 	//routine(res, x, y, n, a);
-	 * */
-	experiment(vektorArray);
+	for(int i = 1; i < 15; i++){
+		experiment(vektorArray, i);
+	}
+	delete vektorArray;
 	return 0;
 }
-
-/*
-Lesen Sie außerdem eine Zahl “Anzahl der Versuche” ein und starten Sie folgendes
-(Zufalls-)Experiment. Bestimmen Sie die relative H¨aufigkeit, dass m unabh¨angig gezo-
-gene Zufallsvektoren aus [0, 1]n
-eine Lange (Norm) kleiner oder gleich 1 haben? Was
-beobachten Sie mit wachsender Dimension n?
-*/
