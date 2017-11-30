@@ -18,7 +18,7 @@ public:
 	bool setFachsemester(short fachsemester);
 	long getMatnr();
 	std::string getGeb();
-	short* getGebShort();
+	long getGebLong();
 	short getStudienfach();
 	short getFachsemester();
 	void randMatnr();

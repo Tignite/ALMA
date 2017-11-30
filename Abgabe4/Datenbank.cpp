@@ -1,4 +1,5 @@
 #include "Datenbank.h"
+#include <time.h> 		/* time */
 
 #include "Student.h"
 class Student;
@@ -6,7 +7,7 @@ class Student;
 using namespace std;
 
 Datenbank::Datenbank(){
-			n = 1;
+			n = 10000;
 			create();
 			matnrRegister = new long[n];
 		}
@@ -36,12 +37,25 @@ Datenbank::~Datenbank(){
 					index = aufsteigendMatnr[i];
 					cout<<"\t"<<array[index]->getMatnr()<<endl;
 				}
-				//array[index]->print();
+				else if(m == 2){
+					index = aufsteigendGeb[i];
+					cout<<"\t"<<array[index]->getGeb()<<endl;
+				}
 			}
 		}
 		void Datenbank::sort(){
+			clock_t start, end;
+			double elapsed_secs;
+			start = clock();
 			sortMatnr(0,n);
+			end = clock();
+			elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+			cout<<"Sortiere "<<n<<" Studenten in "<<elapsed_secs<<endl;
+			start = clock();
 			sortGeb(0,n);
+			end = clock();
+			elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
+			cout<<"Sortiere "<<n<<" Studenten in "<<elapsed_secs<<endl;
 		}
 		//private
 		void Datenbank::create(){
@@ -76,8 +90,12 @@ Datenbank::~Datenbank(){
 			long matnrA = 0, matnrB = 0;
 			int s1, s2, n1, n2, counter;
 			s1 = s;
-			counter = 0;
-			if(n%2 == 0) s2 = n1 = n2 = n/2;
+			counter = s;
+			if(n%2 == 0){
+				s2 = s + n/2;
+				n1 = n/2;
+				n2 = n/2;
+			}
 			else{
 				s2 = s + 1 + n/2;
 				n1 = n/2 + 1;
@@ -145,5 +163,78 @@ Datenbank::~Datenbank(){
 
 		}
 		void Datenbank::sortGeb(int s, int n){
+			long gebA = 0, gebB = 0;
+			int s1, s2, n1, n2, counter;
+			s1 = s;
+			counter = s;
+			if(n%2 == 0){
+				s2 = s + n/2;
+				n1 = n/2;
+				n2 = n/2;
+			}
+			else{
+				s2 = s + 1 + n/2;
+				n1 = n/2 + 1;
+				n2 = n/2;
+			}
+			if(n == 1){
+				aufsteigendGeb[s] = aufsteigendBuffer[s];
+			}
+			else if(n == 2){
+				gebA = array[aufsteigendBuffer[s]]->getGebLong();
+				gebB = array[aufsteigendBuffer[s+1]]->getGebLong();
+				if(gebA < gebB){
+					aufsteigendGeb[s] = aufsteigendBuffer[s+1];
+					aufsteigendGeb[s+1] = aufsteigendBuffer[s];
+				}
+				else{
+					aufsteigendGeb[s] = aufsteigendBuffer[s];
+					aufsteigendGeb[s+1] = aufsteigendBuffer[s+1];
+				}
+
+			}
+			else{
+				sortGeb(s1, n1);
+				sortGeb(s2, n2);
+				int a = s1, b = s2;
+				while(counter < (s + n)){
+					gebA = array[aufsteigendBuffer[a]]->getGebLong();
+					gebB = array[aufsteigendBuffer[b]]->getGebLong();
+					if(gebA < gebB){
+						aufsteigendGeb[counter] = aufsteigendBuffer[b];
+						if(b < (s2 + n2 - 1)){
+							b++;
+						}
+						else{
+							counter++;
+							while(counter < (s + n)){
+								aufsteigendGeb[counter] = aufsteigendBuffer[a];
+								counter++;
+								a++;
+							}
+						}
+					}
+					else{
+						aufsteigendGeb[counter] = aufsteigendBuffer[a];
+						if(a < (s1 + n1 - 1)){
+							a++;
+						}
+						else{
+							counter++;
+							while(counter < (s + n)){
+								aufsteigendGeb[counter] = aufsteigendBuffer[b];
+								counter++;
+								b++;
+							}
+						}
+					}
+					counter++;
+				}
+			}
+
+			//Array Updaten
+			for(counter = s;counter < s + n; counter++){
+				aufsteigendBuffer[counter] = aufsteigendGeb[counter];
+			}
 
 		}

@@ -20,11 +20,14 @@ using namespace std;
 
 int main(int argc, char** argv){
 	srand(time(NULL));
-	Datenbank* Test = new Datenbank(35);
-	Test->print(0);
+	Datenbank* Test = new Datenbank(100000);
+	//Test->print(0);
 	Test->sort();
-	cout<<"\n\t~Sortiert~\n";
-	Test->print(1);
+	//cout<<"\n\t~Sortiert - Matnr~\n";
+	//Test->print(1);
+	//cout<<"\n\t~Sortiert - Geb~\n";
+	//Test->print(2);
+	cout<<"done\n";
 	delete Test;
 	return 0;
 }

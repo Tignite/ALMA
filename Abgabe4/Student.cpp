@@ -71,8 +71,13 @@ Student::~Student(){
 	string Student::getGeb(){
 		return (to_string(geb[0]) + "." + to_string(geb[1]) + "." + to_string(geb[2]));
 	}
-	short* Student::getGebShort(){
-		return geb;
+	long Student::getGebLong(){
+		long gebLong = geb[2];
+		gebLong = gebLong * 100;
+		gebLong += geb[1];
+		gebLong = gebLong * 100;
+		gebLong += geb[0];
+		return gebLong;
 	}
 	short Student::getStudienfach(){
 		return studienfach;
