@@ -48,7 +48,7 @@ typedef struct Graphen{
 				cout << "}";
 			}
 			else{
-				cout << "Debug: Empty Array\n" << size << endl << used << endl;
+				cout << "Debug: isEmpty Array\n" << size << endl << used << endl;
 			}
 		}
 		int search(int element){
@@ -121,15 +121,15 @@ typedef struct Graphen{
 			return false;
 		}
 
-		// Returns whether or not the array is full
-		bool full(){
-			if(used == size) return true;
+		// Returns whether or not the array is isEmpty
+		bool isEmpty(){
+			if(used == 0) return true;
 			return false;
 		}
 
-		// Returns whether or not the array is empty
-		bool empty(){
-			if(used == 0) return true;
+		// Returns whether or not the array is full
+		bool isFull(){
+			if(used == size) return true;
 			return false;
 		}
 
@@ -267,7 +267,7 @@ private:
 		}
 
 		if(getZusammenhang(Unbesucht->getFirst(), Besucht, Unbesucht) == true
-				&& Unbesucht->empty() == true){
+				&& Unbesucht->isEmpty() == true){
 			ret = true;
 		}
 
