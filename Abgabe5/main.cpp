@@ -9,7 +9,7 @@ int n1 , int m1 , int n2 , int m2);
 
 int main() {
 
-	/*
+	
 	int **matrix1, **matrix2, **matrix3, **matrixErgebnis, n1, m1, n2, m2;
 	//Einlesen der Matrix aus graph1.dat
 	matrix1 = read_matrix_file("graph1.dat", &n1, &m1);
@@ -36,8 +36,8 @@ int main() {
 	delete_matrix(matrixErgebnis, n2, m2);
 	return 0;
 
-	Aufgabe 2
-	*/
+	/*Aufgabe 2
+	
 	Graphen *G1 = new Graphen("graph1.dat");
 	Graphen *G2 = new Graphen("graph2.dat");
 	G1->print();
@@ -51,6 +51,7 @@ int main() {
 	delete G1;
 	delete G2;
 	return 0;
+	*/
 }
 
 int ** sum(int **mat1 , int **mat2 , int n , int m) {
