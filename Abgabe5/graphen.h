@@ -78,17 +78,22 @@ typedef struct Graphen{
 		int get(size_t i, size_t j){
 			return get(i*dimension + j);
 		}
-		size_t getSize() {return size;}
-		size_t getUsed() {return used;}
-		size_t getDim() {return dimension;}
+		int getSize() {return size;}
+		int getUsed() {return used;}
+		int getDim() {return dimension;}
 
 		//Removes the element with given index
 		bool removeIndex(size_t index){
 			if(index < used){
-				for(size_t i = index; i < used - 1; i++){
-					data[i] = data[i + 1];
+				if(index >= 0){
+					for(size_t i = index; i < used - 1; i++){
+						data[i] = data[i + 1];
+					}
+					data[used - 1] = -1;
 				}
-				data[used - 1] = -1;
+				else{
+					data[0] = -1;
+				}
 				used--;
 				return true;
 			}
@@ -108,6 +113,12 @@ typedef struct Graphen{
 			return false;
 		}
 
+		void clear(){
+			while(used > 0){
+				removeIndex(used -1);
+			}
+		}
+
 	private:
 		size_t size;
 		size_t used;
@@ -119,7 +130,9 @@ typedef struct Graphen{
 private:
 	int **adjMatrix;
 	int n, m;
-public:
+	bool gerichtet;
+
+private:
 	int getGrad(int start){
 		int grad = 0;
 		for(int i = 0; i < n; i++){
@@ -159,16 +172,9 @@ public:
 		if(Nachbarn != nullptr){
 			for(int i = 0; i < grad; i++){
 				if(weg(maxLaenge - 1, Nachbarn->get(i), ziel, Besucht, mode) == true ){
-					/*
-					 * Debug:
-					 */
-					cout << "Weg gefunden " << start << "->" << *ziel << "\tLaenge =" << maxLaenge << endl;
-					/*
-					 * Debug:
-					 */
 					return true;
 				}
-				else{
+				else if (i == grad - 1){
 					if(findNachbarn(start, &grad, Besucht) != nullptr){
 						Besucht->removeElement(start);
 					}
@@ -201,6 +207,40 @@ public:
 		delete Besucht;
 		return false;
 	}
+	void checkGerichtet(){
+		gerichtet = false;
+		for(int i = 0; i < n; i++){
+			for(int j = i; j < n; j++){
+				if(adjMatrix[i][j] != adjMatrix[j][i]){
+					gerichtet = true;
+					break;
+				}
+			}
+		}
+	}
+	bool gesamtZusammenhang(int start, Array *Besucht){
+		Besucht->insert(start);
+		if(Besucht->getUsed() == n){
+			return true;
+		}
+		int grad = getGrad(start);
+		if(grad > 0) {
+			Array *Nachbarn = findNachbarn(start, &grad, Besucht);
+			while(grad > 0){
+				if(gesamtZusammenhang(Nachbarn->get(grad - 1), Besucht) == true){
+					delete Nachbarn;
+					return true;
+				}
+				else{
+					grad--;
+				}
+			}
+			delete Nachbarn;
+			return false;
+		}
+		else return false;
+	}
+
 public:
 	Graphen(string dateiName){
 		adjMatrix = read_matrix_file(dateiName, &n, &m);
@@ -212,21 +252,25 @@ public:
 			m = 0;
 			cout << "Matrix fehlerhaft, nicht symmetrisch\n";
 		}
+		checkGerichtet();
 	}
 	Graphen(){
 		adjMatrix = read_matrix_file("circle.dat", &n, &m);
+		checkGerichtet();
 	}
 	~Graphen(){
 		delete_matrix(adjMatrix, n, m);
 	}
 
 	void print(){
+		if(gerichtet == true) cout << "\nGerichteter Graph:\n";
+		else cout << "\nUngerichteter Graph:\n";
 		print_matrix(adjMatrix,n,m);
 	}
 
-	auto getDim(){
-		auto dim = { n, m };
-		return dim;
+	bool getGerichtet(){
+		if(gerichtet == true) return true;
+		return false;
 	}
 
 	bool wegExist(int maxLaenge, int start, int ziel){
@@ -239,16 +283,55 @@ public:
 			bool ret = weg(maxLaenge, start, &ziel, Besucht, 0);
 			delete Besucht;
 			delete Fertig;
+			if(ret == true){
+				cout << "Weg gefunden " << start << "->" << ziel << "\tMaxLaenge =" << maxLaenge << endl;
+			}
+			else{
+				cout << "Kein Weg gefunden " << start << "->" << ziel << "\tMaxLaenge =" << maxLaenge << endl;
+			}
+
 			return ret;
 		}
 		else return false;
 	}
 
 	bool kreisExist(){
-		bool ref = hatKreise();
-		if(ref == true) cout << "\nGraph hat Kreise" << endl;
+		bool ret = hatKreise();
+		if(ret == true) cout << "\nGraph hat Kreise" << endl;
 		else cout << "\nGraph hat keine Kreise" << endl;
-		return ref;
+		return ret;
+	}
+
+	bool zusammenhang(){
+		Array *Besucht = new Array(n);
+		bool ret = false;
+		for(int start = 0; start < n; start++){
+			ret = gesamtZusammenhang(start, Besucht);
+			Besucht->clear();
+			if(ret == true) break;
+		}
+		if(ret == true){
+			if(gerichtet == false){
+				cout << "\nGraph ist stark zusammenhaengend" << endl;
+			}
+			else{
+				for(int i = 0; i < n; i++){
+					for(int j = i; j < n; j++){
+						bool wegA = wegExist(n, i, j);
+						bool wegB = wegExist(n, j, i);
+						if(wegA != wegB){
+							delete Besucht;
+							cout << "\nGraph ist nicht stark zusammenhaengend" << endl;
+							return ret;
+						}
+					}
+				}
+				cout << "\nGraph ist stark zusammenhaengend" << endl;
+			}
+
+		}
+		else cout << "\nGraph ist nicht zusammenhaengend" << endl;
+		return ret;
 	}
 
 }Graphen;
