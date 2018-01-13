@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 struct erdos{
 public:
 	graph *g;
@@ -44,6 +45,22 @@ public:
 			}
 		}
 		return true;
+	}
+
+	bool connected_floyd_warshall(){
+		int **dist = floyd_warshall();
+		for(int i = 0; i < count; i++){
+			if(dist[0][i] == INT_MAX)
+				return false;
+		}
+		return true;
+	}
+
+	int collab_distance_floyd_warshall(string nameA, string nameB){
+		int **dist = floyd_warshall();
+		int start = name_to_number(nameA);
+		int target = name_to_number(nameB);
+		return dist[start][target];
 	}
 
 	int collaboration_distance(string nameA, string nameB){
@@ -304,10 +321,10 @@ int main(){
 	erdos *e = new erdos();
 	string personA = "ABBOTT, HARVEY LESLIE";
 	string personB = "AGOH, TAKASHI";
-	e->max_collab_dist_in_connections();
+	//e->max_collab_dist_in_connections();
 	//cout << e->collaboration_distance(personA, personB);
 	//cout << endl << e->legende[0] << e->legende[1];
 	//cout << e->connected();
+	//cout << e->connected_floyd_warshall();
 	return 0;
 }
-
