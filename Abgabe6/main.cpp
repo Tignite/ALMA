@@ -2,6 +2,7 @@
 #include <string>
 #include <list>
 #include <climits>		//int_max
+#include <vector>
 
 #include "gph_io.h"
 
@@ -12,6 +13,7 @@ struct erdos{
 public:
 	graph *g;
 	int **adj_matrix;
+	int **dist;
 	int count;
 
 	erdos(){
@@ -20,35 +22,28 @@ public:
 		if(g != nullptr){
 			count = g->node_count;
 			adj_matrix = list_to_matrix();
+			dist = floyd_warshall();
 		}
-		else
+		else{
 			adj_matrix = nullptr;
+			dist = nullptr;
+		}
 	}
 	~erdos(){
-		delete(g);
-	}
-
-	bool connected(){
-		int** matrix = add_matrix(adj_matrix, transpose(adj_matrix));
-		matrix = add_matrix(matrix, unit_matrix());
-		int** buffer = matrix;
-		cout << "Starting multiplication...\n";
-		for(int i = 0; i < count-1; i++){
-			buffer = multiply_matrix(buffer, matrix);
-			cout << i;
-			if(i % 10 == 1) cout << endl;
-		}
-		for(int i = 0; i < count; i++){
-			for(int j = 0; j < count; j++){
-				if(buffer[i][j] == 0)
-					return false;
+		if(g != nullptr){
+			delete(g);
+			for(int i = 0; i < count; i++){
+				delete[] (dist[i]);
 			}
+			delete[] (dist);
+			g = nullptr;
+			adj_matrix = nullptr;
+			dist = nullptr;
 		}
-		return true;
+		count = 0;
 	}
 
 	bool connected_floyd_warshall(){
-		int **dist = floyd_warshall();
 		for(int i = 0; i < count; i++){
 			if(dist[0][i] == INT_MAX)
 				return false;
@@ -57,84 +52,41 @@ public:
 	}
 
 	int collab_distance_floyd_warshall(string nameA, string nameB){
-		int **dist = floyd_warshall();
 		int start = name_to_number(nameA);
 		int target = name_to_number(nameB);
 		return dist[start][target];
 	}
 
-	int collaboration_distance(string nameA, string nameB){
-		int start = name_to_number(nameA);
-		int target = name_to_number(nameB);
-		int** matrix = add_matrix(adj_matrix, unit_matrix());
-		int** buffer = matrix;
-		int counter = 1;
-		while(counter < count){
-			if(buffer[start][target] != 0)
-				break;
-			buffer = multiply_matrix(buffer, matrix);
-			counter++;
-		}
-		if(counter == count)
-			counter = -1;
+	int max_collab_dist(){
+		vector<bool> visited(count, false);
+		list<int> neighbors;
+		int max = 0;
 		for(int i = 0; i < count; i++){
-			delete[] (matrix[i]);
-			delete[] (buffer[i]);
-		}
-		delete matrix;
-		delete buffer;
-		return counter;
-	}
-
-	void max_collab_dist_in_connections(){
-		int **dist = floyd_warshall();
-		list<int*> components;
-		list<int> visited;
-		for(int i = 0; i < count; i++){
-			int distance = 0;
-			if(search_list(&visited, index_up(i)) == true)
-				continue;
-			else{
-				visited.push_back(index_up(i));
-				list<int> neighbors;
-				for(int k = 0; k < count; k++){
-					if(adj_matrix[i][k] == 1){
-						neighbors.push_back(k);
-					}
-					int val = dist[i][k];
-					if((val != INT_MAX) && (val > distance))
-						distance = val;
-				}
+			if(visited[i] == false){
+				visited[i] = true;
+				neighbors.push_back(i);
 				while(neighbors.empty() == false){
-					int element = neighbors.front();
+					int row = neighbors.front();
 					neighbors.pop_front();
-
-					for(int k = 0; k < count; k++){
-						if((adj_matrix[element][k] == 1 ) &&
-								search_list(&neighbors, k) == false &&
-										search_list(&visited, k) == false)
-							neighbors.push_back(k);
-						int val = dist[element][k];
-						if((val != INT_MAX) && (val > distance))
-							distance = val;
+					visited[row] = true;
+					for(int j = 0; j < count; j++){
+						int point = dist[row][j];
+						if((visited[j] == false) &&
+								(adj_matrix[row][j] == 1) &&
+								(search_list(&neighbors, j) == false)){
+							neighbors.push_back(j);
+						}
+						if((point != INT_MAX) &&
+								(point > max)){
+							max = point;
+						}
 					}
-					visited.push_back(element);
 				}
-				int *vector = new int[2];
-				vector[0] = i;
-				vector[1] =  distance;
-				components.push_back(vector);
 			}
 		}
-		//Ausgabe
-		cout << "Maximale Collaboration Distance:\n";
-		for(int *x: components){
-			cout << "\nKomponente enthaelt:\n" << number_to_name(x[0]);
-			cout << "\nMaximale Distanz innerhalb = " << x[1] << endl;
-			delete[](x);
-		}
-
-		delete[] (dist);
+		delete (&visited);
+		delete (&neighbors);
+		return max;
 	}
 
 private:
@@ -175,22 +127,16 @@ private:
 				}
 			}
 		}
+		for (int i = 0; i < count; ++i)
+		{
+			delete[] predecessor[i];
+		}
 		delete[] (predecessor);
 		return distance;
 	}
 
 	int index_up(int i){
 		return i+1;
-	}
-
-	int **transpose(int** matrix){
-		int** ret = init_matrix(count);
-		for(int i = 0; i < count; i++){
-			for(int j = 0; j < count; j++){
-				ret[i][j] = matrix[j][i];
-			}
-		}
-		return ret;
 	}
 
 	int **list_to_matrix(){
@@ -232,19 +178,6 @@ private:
 		for(int i = 0; i < count; i++){
 			for(int j = 0; j < count; j++){
 				ret[i][j] = matrixA[i][j] + matrixB[i][j];
-			}
-		}
-		return ret;
-	}
-
-	int **multiply_matrix(int** matrixA, int** matrixB){
-		int** ret = init_matrix(count);
-		for(int i = 0; i < count; i++){
-			for(int j = 0; j < count; j++){
-				ret[i][j] = 0;
-				for(int k = 0; k < count; k++){
-					ret[i][j] += matrixA[i][k] * matrixB[k][j];
-				}
 			}
 		}
 		return ret;
@@ -306,14 +239,14 @@ private:
 			}
 		}
 	}
-
+	
 	bool search_list(list<int> *l, int n){
-		list<int> lis = *l;
-		for(int x: lis){
-			if(x == n)
-				return true;
-		}
-		return false;
+			list<int> lis = *l;
+			for(int x: lis){
+				if(x == n)
+					return true;
+			}
+			return false;
 	}
 };
 
@@ -321,10 +254,9 @@ int main(){
 	erdos *e = new erdos();
 	string personA = "ABBOTT, HARVEY LESLIE";
 	string personB = "AGOH, TAKASHI";
-	//e->max_collab_dist_in_connections();
+	//cout << e->connected_floyd_warshall();
+	cout << endl << e->max_collab_dist();
 	//cout << e->collaboration_distance(personA, personB);
 	//cout << endl << e->legende[0] << e->legende[1];
-	//cout << e->connected();
-	//cout << e->connected_floyd_warshall();
 	return 0;
 }
