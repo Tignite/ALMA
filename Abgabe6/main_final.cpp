@@ -59,6 +59,7 @@ public:
 
 	int max_collab_dist(){
 		vector<bool> visited(count, false);
+		vector<bool> neighbors_visited(count, false);
 		list<int> neighbors;
 		int max = 0;
 		for(int i = 0; i < count; i++){
@@ -72,8 +73,10 @@ public:
 					for(int j = 0; j < count; j++){
 						int point = dist[row][j];
 						if((visited[j] == false) &&
-								(adj_matrix[row][j] == 1)){
+								(adj_matrix[row][j] == 1) &&
+								(neighbors_visited[j] == false)){
 							neighbors.push_back(j);
+							neighbors_visited[j] = true;
 						}
 						if((point != INT_MAX) &&
 								(point > max)){
@@ -83,8 +86,6 @@ public:
 				}
 			}
 		}
-		delete (&visited);
-		delete (&neighbors);
 		return max;
 	}
 
