@@ -3,8 +3,13 @@
 #include <list>
 #include <climits>		//int_max
 #include <vector>
+#include <cassert>
+#include <fstream>
+#include <sstream>
 
-#include "gph_io.h"
+using namespace std;
+
+
 
 struct Edge{
 	int target;
@@ -22,7 +27,6 @@ struct Edge{
 struct UEFA{
 	const int size = 8;
 	const int sizeMatrix = (2*size) + 2;
-
 	vector<vector<string>> Teams;
 	int** flussnetz;
 	int** flow;
@@ -234,6 +238,6 @@ int main(){
 	t->print_matrix(t->flussnetz);
 	cout << endl;
 	t->print_matrix(t->flow);
-	t->finale(false);
+	t->finale(true);
 	return 0;
 }
